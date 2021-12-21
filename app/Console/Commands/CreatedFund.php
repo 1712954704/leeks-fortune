@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Fund;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use App\Constants\Fund as ConstantsFund;
 
 class CreatedFund extends Command
 {
@@ -38,7 +41,58 @@ class CreatedFund extends Command
      */
     public function handle()
     {
-        //
-        echo 'hello';
+        $url = ConstantsFund::FUND_LITTLE_BEAR_ALL_GET;
+        var_dump($url);die();
+//        $this->created_fund_info();
+    }
+
+    /**
+     * 批量获取基金详情
+     */
+    public function batch_get_fund_detail()
+    {
+        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_GET;
+        $result = send($url,'get');
+        $fund = new Fund();
+        try {
+            foreach ($result['data'] as $item){
+                $data = [
+                    'code' => $item[0],
+                    'abbr_name' => $item[1],
+                    'name' => $item[2],
+                    'type' => $item[3],
+                    'full_name' => $item[4],
+                ];
+                $fund->insert($data);
+            }
+            var_dump('ok');
+        }catch (\Exception $exception){
+            var_dump($exception->getMessage()); die();
+        }
+    }
+
+    /**
+     * 生成基金基本信息
+    */
+    public function created_fund_info()
+    {
+        $url = ConstantsFund::FUND_LITTLE_BEAR_ALL_GET;
+        $result = send($url,'get');
+        $fund = new Fund();
+        try {
+            foreach ($result['data'] as $item){
+                $data = [
+                    'code' => $item[0],
+                    'abbr_name' => $item[1],
+                    'name' => $item[2],
+                    'type' => $item[3],
+                    'full_name' => $item[4],
+                ];
+                $fund->insert($data);
+            }
+            var_dump('ok');
+        }catch (\Exception $exception){
+            var_dump($exception->getMessage()); die();
+        }
     }
 }
