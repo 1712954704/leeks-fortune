@@ -61,8 +61,8 @@ class CreatedFund extends Command
         $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
         $result_id = array_map('get_object_vars', $result_id);
         $limit = $result_id[0]['id']; // 初始值
-        $start_time = '2021-12-26';
-        $end_time = '2021-01-01';
+        $start_time = '2021-01-01';
+        $end_time = date('Y-m-d');
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
         $data = [];
