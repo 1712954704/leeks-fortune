@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Fund;
+use App\Models\FundWorthDetail;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Constants\Fund as ConstantsFund;
@@ -24,6 +25,8 @@ class CreatedFund extends Command
      */
     protected $description = 'created leek_fund';
 
+    protected $limit_num = 100;
+
     /**
      * Create a new command instance.
      *
@@ -41,9 +44,8 @@ class CreatedFund extends Command
      */
     public function handle()
     {
-        $url = ConstantsFund::FUND_LITTLE_BEAR_ALL_GET;
-        var_dump($url);die();
 //        $this->created_fund_info();
+        $this->batch_get_fund_detail();
     }
 
     /**
@@ -51,24 +53,43 @@ class CreatedFund extends Command
      */
     public function batch_get_fund_detail()
     {
-        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_GET;
-        $result = send($url,'get');
+        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
+        $limit = 0; // 初始值
+        $start_time = '2021-12-26';
+        $end_time = '2021-01-01';
         $fund = new Fund();
-        try {
-            foreach ($result['data'] as $item){
-                $data = [
-                    'code' => $item[0],
-                    'abbr_name' => $item[1],
-                    'name' => $item[2],
-                    'type' => $item[3],
-                    'full_name' => $item[4],
-                ];
-                $fund->insert($data);
+        $FundWorthDetail = new FundWorthDetail();
+        $count = $fund->count();
+        $num = ceil($count/$this->limit_num);
+        $data = [];
+        for ($num;$num > 0;$num--){
+            $offset = $limit + $this->limit_num;
+            $result = DB::select('select id,code from leeks_fund order by id asc limit :limit,:offset', ['limit' => $limit,'offset'=>$offset]);
+            $result = array_map('get_object_vars', $result);
+            $string_code = implode(',',array_column($result,'code'));
+            $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
+            $url .= $option;
+            $send_result = send($url,'get');
+
+            if ($send_result['code'] == 200){
+                foreach ($send_result['data'] as $item){
+                    $data['code'] = $item['code'];
+                    // 历史净值信息
+                    if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
+                        foreach ($item['netWorthData'] as $info){
+                            $data = [
+                                'code' => $item['code'],
+                                'date' => $info[0],    // 日期
+                                'nav' => $info[1],     // 单位净值
+                                'worth' => $info[2],   // 净值涨幅
+                            ];
+                            $FundWorthDetail->insert($data);
+                        }
+                    }
+                }
             }
-            var_dump('ok');
-        }catch (\Exception $exception){
-            var_dump($exception->getMessage()); die();
         }
+        echo 'done';
     }
 
     /**
