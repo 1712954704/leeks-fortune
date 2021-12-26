@@ -78,7 +78,7 @@ class CreatedFund extends Command
             $string_code = implode(',',array_column($result,'code'));
             $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
             $url .= $option;
-            if (!($send_num%100)){
+            if (!($send_num%100) && $send_num){
                 sleep(3600);
                 $send_result = send($url,'get');
             }else{
@@ -88,7 +88,6 @@ class CreatedFund extends Command
             if ($send_result['code'] == 200){
                 $send_num ++;
                 foreach ($send_result['data'] as $item){
-                    $data['code'] = $item['code'];
                     // 历史净值信息
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
