@@ -58,15 +58,17 @@ class CreatedFund extends Command
         $FundWorthDetail = new FundWorthDetail();
         $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
         $result_code = array_map('get_object_vars', $result_code);
-        $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
-        $result_id = array_map('get_object_vars', $result_id);
-        $limit = $result_id[0]['id']; // 初始值
+        if ($result_code){
+            $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
+            $result_id = array_map('get_object_vars', $result_id);
+            $limit = $result_id[0]['id']; // 初始值
+        }else{
+            $limit = 0; // 初始值
+        }
         $start_time = '2021-01-01';
         $end_time = date('Y-m-d');
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
-        $data = [];
-//        $time = date('Y-m-d H');
         $send_num = 0;
 
         for ($i = 1;$i <= $num;$i++){
@@ -91,8 +93,8 @@ class CreatedFund extends Command
                     // 历史净值信息
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
-//                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
-//                            if (!$get_info){
+                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
+                            if (!$get_info){
                                 $data = [
                                     'code' => $item['code'],
                                     'date' => $info[0],    // 日期
@@ -100,7 +102,7 @@ class CreatedFund extends Command
                                     'worth' => round($info[2],4),   // 净值涨幅
                                 ];
                                 $FundWorthDetail->insert($data);
-//                            }
+                            }
                         }
                     }
                 }
