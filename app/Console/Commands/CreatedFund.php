@@ -92,8 +92,8 @@ class CreatedFund extends Command
                     // 历史净值信息
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
-                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
-                            if (!$get_info){
+//                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
+//                            if (!$get_info){
                                 $data = [
                                     'code' => $item['code'],
                                     'date' => $info[0],    // 日期
@@ -101,7 +101,7 @@ class CreatedFund extends Command
                                     'worth' => round($info[2],4),   // 净值涨幅
                                 ];
                                 $FundWorthDetail->insert($data);
-                            }
+//                            }
                         }
                     }
                 }
