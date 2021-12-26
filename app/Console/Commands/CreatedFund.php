@@ -69,7 +69,7 @@ class CreatedFund extends Command
 //        $time = date('Y-m-d H');
         $send_num = 0;
 
-        for ($i = 1;$i < $num;$i++){
+        for ($i = 1;$i <= $num;$i++){
             if ($i > 1){
                 $limit += $this->limit_num;
             }
