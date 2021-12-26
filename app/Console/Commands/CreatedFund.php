@@ -54,11 +54,15 @@ class CreatedFund extends Command
     public function batch_get_fund_detail()
     {
         $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
-        $limit = 0; // 初始值
-        $start_time = '2021-12-26';
-        $end_time = '2021-01-01';
         $fund = new Fund();
         $FundWorthDetail = new FundWorthDetail();
+        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
+        $result_code = array_map('get_object_vars', $result_code);
+        $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
+        $result_id = array_map('get_object_vars', $result_id);
+        $limit = $result_id[0]['id']; // 初始值
+        $start_time = '2021-12-26';
+        $end_time = '2021-01-01';
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
         $data = [];
@@ -74,7 +78,7 @@ class CreatedFund extends Command
             $string_code = implode(',',array_column($result,'code'));
             $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
             $url .= $option;
-            if ($send_num > 100){
+            if (!($send_num%100)){
                 sleep(3600);
                 $send_result = send($url,'get');
             }else{
