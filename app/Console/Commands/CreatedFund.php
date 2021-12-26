@@ -80,8 +80,8 @@ class CreatedFund extends Command
                             $data = [
                                 'code' => $item['code'],
                                 'date' => $info[0],    // 日期
-                                'nav' => $info[1],     // 单位净值
-                                'worth' => $info[2],   // 净值涨幅
+                                'nav' => round($info[1],4),     // 单位净值
+                                'worth' => round($info[2],4),   // 净值涨幅
                             ];
                             $FundWorthDetail->insert($data);
                         }
