@@ -26,7 +26,7 @@ class CreatedFund extends Command
      */
     protected $description = 'created leek_fund';
 
-    protected $limit_num = 50;
+    protected $limit_num = 100;
 
     /**
      * Create a new command instance.
