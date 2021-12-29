@@ -73,6 +73,7 @@ class CreatedFund extends Command
         $send_num = 0;
 
         for ($i = 1;$i <= $num;$i++){
+            $send_result = [];
             if ($i > 1){
                 $limit += $this->limit_num;
             }
