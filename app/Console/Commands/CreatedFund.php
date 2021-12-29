@@ -68,13 +68,13 @@ class CreatedFund extends Command
 //            $limit = 0; // 初始值
 //        }
         $limit = 0; // 初始值
-        $start_time = '2021-12-24';
+        $start_time = '2021-01-01';
         $end_time = date('Y-m-d');
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
         $send_num = 0;
 
-        for ($i = 1;$i <= $num;$i++){
+        for ($i = 1;$i <= ($num+1);$i++){
             $send_result = [];
             if ($i > 1){
                 $limit += $this->limit_num;
