@@ -56,16 +56,17 @@ class CreatedFund extends Command
         $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
         $fund = new Fund();
         $FundWorthDetail = new FundWorthDetail();
-        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
-        $result_code = array_map('get_object_vars', $result_code);
-        if ($result_code){
-            $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
-            $result_id = array_map('get_object_vars', $result_id);
-            $limit = $result_id[0]['id']; // 初始值
-        }else{
-            $limit = 0; // 初始值
-        }
-        $start_time = '2021-01-01';
+//        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
+//        $result_code = array_map('get_object_vars', $result_code);
+//        if ($result_code){
+//            $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
+//            $result_id = array_map('get_object_vars', $result_id);
+//            $limit = $result_id[0]['id']; // 初始值
+//        }else{
+//            $limit = 0; // 初始值
+//        }
+        $limit = 0; // 初始值
+        $start_time = '2021-12-24';
         $end_time = date('Y-m-d');
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
@@ -94,6 +95,7 @@ class CreatedFund extends Command
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
                             $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
+                            // 不存在则写入,存在则更新
                             if (!$get_info){
                                 $data = [
                                     'code' => $item['code'],
@@ -102,6 +104,8 @@ class CreatedFund extends Command
                                     'worth' => round($info[2],4),   // 净值涨幅
                                 ];
                                 $FundWorthDetail->insert($data);
+                            }else{
+                                DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', ['nav'=>round($info[1],4),'worth'=>round($info[2],4),'code' => $item['code'],'date'=>$info[0]]);
                             }
                         }
                     }
