@@ -54,7 +54,7 @@ class CreatedFund extends Command
      */
     public function batch_get_fund_detail()
     {
-        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
+//        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
         $fund = new Fund();
         $FundWorthDetail = new FundWorthDetail();
         $RequestLog = new RequestLog();
@@ -75,6 +75,7 @@ class CreatedFund extends Command
         $send_num = 0;
 
         for ($i = 1;$i <= ($num+1);$i++){
+            $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
             $send_result = [];
             if ($i > 1){
                 $limit += $this->limit_num;
