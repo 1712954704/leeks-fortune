@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Fund;
 use App\Models\FundWorthDetail;
+use App\Models\RequestLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Constants\Fund as ConstantsFund;
@@ -56,6 +57,7 @@ class CreatedFund extends Command
         $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
         $fund = new Fund();
         $FundWorthDetail = new FundWorthDetail();
+        $RequestLog = new RequestLog();
 //        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
 //        $result_code = array_map('get_object_vars', $result_code);
 //        if ($result_code){
@@ -88,7 +90,11 @@ class CreatedFund extends Command
             }else{
                 $send_result = send($url,'get');
             }
-
+            // 写入日志
+            $log_data = [
+                'result' => json_encode($send_result,JSON_UNESCAPED_UNICODE),
+            ];
+            $RequestLog->insert($log_data);
             if ($send_result['code'] == 200){
                 $send_num ++;
                 foreach ($send_result['data'] as $item){
