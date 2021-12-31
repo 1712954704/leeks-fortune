@@ -69,7 +69,7 @@ class CreatedFund extends Command
 //        }
         $limit = 0; // 初始值
         $start_time = '2021-01-01';
-        $end_time = date('Y-m-d');
+        $end_time = date('Y-m-d',strtotime('-1 day'));
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
         $send_num = 0;
@@ -105,9 +105,10 @@ class CreatedFund extends Command
                             $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
                             // 不存在则写入,存在则更新
                             if (!$get_info){
+                                $date = $info[0].' 00:00:00';
                                 $data = [
                                     'code' => $item['code'],
-                                    'date' => $info[0],    // 日期
+                                    'date' => $date,    // 日期
                                     'nav' => round($info[1],4),     // 单位净值
                                     'worth' => round($info[2],4),   // 净值涨幅
                                 ];
