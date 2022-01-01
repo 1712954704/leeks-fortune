@@ -52,6 +52,15 @@ return [
             'prefix' => '',
             'strict' => true,
             'engine' => null,
+
+            'strict' => true, //mysql version 5.6 set to false,mysql version 5.7 set to true
+            'modes' => [
+                'STRICT_ALL_TABLES',
+                'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_ZERO_DATE',
+                'NO_ZERO_IN_DATE',
+                'NO_AUTO_CREATE_USER',
+            ],
         ],
 
         'pgsql' => [
