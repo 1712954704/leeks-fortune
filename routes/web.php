@@ -15,3 +15,8 @@
 //    return view('welcome');
 //});
 Route::get('/', 'IndexController@index');
+
+Route::group(['prefix' => 'api', 'namespace' => 'Api'], function() {
+//    Route::get('index', 'IndexController@index');
+    Route::get('leeks/search', 'LeeksController@search_leeks');
+});
