@@ -18,7 +18,7 @@ class LeeksController extends BaseController
         $start_time = request()->input('start_time') ?? date('Y-m-d',strtotime('-1 month'));
         $end_time = request()->input('end_time') ?? date('Y-m-d',strtotime('-1 day'));
         $limit = request()->input('limit') ?? 0;
-        $pos = request()->input('limit') ?? 10;
+        $pos = request()->input('pos') ?? 10;
         $fund = new Fund();
         $total = $fund->count();
         $list = [];
