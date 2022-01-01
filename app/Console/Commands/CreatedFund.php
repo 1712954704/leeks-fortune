@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Fund;
 use App\Models\FundWorthDetail;
+use App\Models\RequestLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use App\Constants\Fund as ConstantsFund;
@@ -25,7 +26,7 @@ class CreatedFund extends Command
      */
     protected $description = 'created leek_fund';
 
-    protected $limit_num = 50;
+    protected $limit_num = 100;
 
     /**
      * Create a new command instance.
@@ -53,25 +54,29 @@ class CreatedFund extends Command
      */
     public function batch_get_fund_detail()
     {
-        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
+//        $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
         $fund = new Fund();
         $FundWorthDetail = new FundWorthDetail();
-        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
-        $result_code = array_map('get_object_vars', $result_code);
-        if ($result_code){
-            $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
-            $result_id = array_map('get_object_vars', $result_id);
-            $limit = $result_id[0]['id']; // 初始值
-        }else{
-            $limit = 0; // 初始值
-        }
+        $RequestLog = new RequestLog();
+//        $result_code = DB::select('select id,code from leeks_fund_worth_detail order by id desc limit 1');
+//        $result_code = array_map('get_object_vars', $result_code);
+//        if ($result_code){
+//            $result_id = DB::select('select id,code from leeks_fund where code = :code',['code'=>$result_code[0]['code']]);
+//            $result_id = array_map('get_object_vars', $result_id);
+//            $limit = $result_id[0]['id']; // 初始值
+//        }else{
+//            $limit = 0; // 初始值
+//        }
+        $limit = 0; // 初始值
         $start_time = '2021-01-01';
-        $end_time = date('Y-m-d');
+        $end_time = date('Y-m-d',strtotime('-1 day'));
         $count = $fund->count();
         $num = ceil($count/$this->limit_num);
         $send_num = 0;
 
-        for ($i = 1;$i <= $num;$i++){
+        for ($i = 1;$i <= ($num+1);$i++){
+            $url = ConstantsFund::FUND_LITTLE_BEAR_BATCH_DETAIL_LIST_GET;
+            $send_result = [];
             if ($i > 1){
                 $limit += $this->limit_num;
             }
@@ -86,7 +91,11 @@ class CreatedFund extends Command
             }else{
                 $send_result = send($url,'get');
             }
-
+            // 写入日志
+            $log_data = [
+                'result' => json_encode($send_result,JSON_UNESCAPED_UNICODE),
+            ];
+            $RequestLog->insert($log_data);
             if ($send_result['code'] == 200){
                 $send_num ++;
                 foreach ($send_result['data'] as $item){
@@ -94,17 +103,23 @@ class CreatedFund extends Command
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
                             $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
+                            // 不存在则写入,存在则更新
                             if (!$get_info){
+                                $date = $info[0].' 00:00:00';
                                 $data = [
                                     'code' => $item['code'],
-                                    'date' => $info[0],    // 日期
+                                    'date' => $date,    // 日期
                                     'nav' => round($info[1],4),     // 单位净值
                                     'worth' => round($info[2],4),   // 净值涨幅
                                 ];
                                 $FundWorthDetail->insert($data);
+                            }else{
+                                DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', ['nav'=>round($info[1],4),'worth'=>round($info[2],4),'code' => $item['code'],'date'=>$info[0]]);
                             }
                         }
                     }
+                    // 更新基金信息(经理,规模)
+                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$item['fundScale'],'code' => $item['code']]);
                 }
             }
         }
