@@ -97,42 +97,49 @@ class CreatedFund extends Command
             $log_data = [
                 'result' => json_encode($send_result,JSON_UNESCAPED_UNICODE),
             ];
-            $RequestLog->insert($log_data);
-            if ($send_result['code'] == 200){
-                $send_num ++;
-                foreach ($send_result['data'] as $item){
-                    var_dump($item['manager']).'==';
-                    var_dump($item['fundScale']).PHP_EOL;
-                    // 更新基金信息(经理,规模)
-                    $length = strpos($item['fundScale'],'亿') ?: false;
-                    if ($length){
-                        $fundScale = substr($item['fundScale'],0,$length);
-                    }else{
-                        $fundScale = $item['fundScale'];
-                    }
-                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', [':manager'=>$item['manager'],':fundScale'=>$fundScale,':code' => $item['code']]);
-                    // 历史净值信息
-                    if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
-                        foreach ($item['netWorthData'] as $info){
-                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', [':code' => $item['code'],':date'=>$info[0]]);
-                            // 不存在则写入,存在则更新
-                            if (!$get_info){
-                                $date = $info[0].' 00:00:00';
-                                $data = [
-                                    'code' => $item['code'],
-                                    'date' => $date,    // 日期
-                                    'nav' => round($info[1],4),     // 单位净值
-                                    'worth' => round($info[2],4),   // 净值涨幅
-                                ];
-                                $FundWorthDetail->insert($data);
-                            }else{
-                                DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', [':nav'=>round($info[1],4),':worth'=>round($info[2],4),':code' => $item['code'],':date'=>$info[0]]);
+            DB::beginTransaction();
+            try {
+                $RequestLog->insert($log_data);
+                if ($send_result['code'] == 200){
+                    $send_num ++;
+                    foreach ($send_result['data'] as $item){
+                        var_dump($item['manager']).'==';
+                        var_dump($item['fundScale']).PHP_EOL;
+                        // 更新基金信息(经理,规模)
+                        $length = strpos($item['fundScale'],'亿') ?: false;
+                        if ($length){
+                            $fundScale = substr($item['fundScale'],0,$length);
+                        }else{
+                            $fundScale = $item['fundScale'];
+                        }
+                        DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', [':manager'=>$item['manager'],':fundScale'=>$fundScale,':code' => $item['code']]);
+                        // 历史净值信息
+                        if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
+                            foreach ($item['netWorthData'] as $info){
+                                $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', [':code' => $item['code'],':date'=>$info[0]]);
+                                // 不存在则写入,存在则更新
+                                if (!$get_info){
+                                    $date = $info[0].' 00:00:00';
+                                    $data = [
+                                        'code' => $item['code'],
+                                        'date' => $date,    // 日期
+                                        'nav' => round($info[1],4),     // 单位净值
+                                        'worth' => round($info[2],4),   // 净值涨幅
+                                    ];
+                                    $FundWorthDetail->insert($data);
+                                }else{
+                                    DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', [':nav'=>round($info[1],4),':worth'=>round($info[2],4),':code' => $item['code'],':date'=>$info[0]]);
+                                }
                             }
                         }
                     }
                 }
+                DB::commit();
+                echo $limit.PHP_EOL;
+            }catch (\Exception $exception){
+                DB::rollBack();
+                var_dump($exception->getMessage()); die();
             }
-            echo $limit.PHP_EOL;
         }
         echo 'done';
     }
