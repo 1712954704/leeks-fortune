@@ -26,7 +26,7 @@ class CreatedFund extends Command
      */
     protected $description = 'created leek_fund';
 
-    protected $limit_num = 150;
+    protected $limit_num = 50;
 
     /**
      * Create a new command instance.
@@ -83,7 +83,7 @@ class CreatedFund extends Command
             $result = DB::select('select id,code from leeks_fund order by id asc limit :limit,:offset', ['limit' => $limit,'offset'=>$this->limit_num]);
             $result = array_map('get_object_vars', $result);
             $string_code = implode(',',array_column($result,'code'));
-//            $string_code = '000069';
+//            $string_code = '000857';
             $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
             $url .= $option;
             if (!($send_num%100) && $send_num){
