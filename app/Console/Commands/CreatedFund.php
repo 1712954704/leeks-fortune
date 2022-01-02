@@ -83,7 +83,7 @@ class CreatedFund extends Command
             $result = DB::select('select id,code from leeks_fund order by id asc limit :limit,:offset', ['limit' => $limit,'offset'=>$this->limit_num]);
             $result = array_map('get_object_vars', $result);
             $string_code = implode(',',array_column($result,'code'));
-//            $string_code = '000857';
+//            $string_code = '000487';
             $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
             $url .= $option;
             if (!($send_num%100) && $send_num){
@@ -103,8 +103,8 @@ class CreatedFund extends Command
                 if ($send_result['code'] == 200){
                     $send_num ++;
                     foreach ($send_result['data'] as $item){
-                        var_dump($item['manager']).'==';
-                        var_dump($item['fundScale']).PHP_EOL;
+//                        var_dump($item['manager']).'==';
+//                        var_dump($item['fundScale']).PHP_EOL;
                         // 更新基金信息(经理,规模)
                         $length = strpos($item['fundScale'],'亿') ?: false;
                         if ($length){
