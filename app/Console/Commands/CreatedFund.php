@@ -116,7 +116,6 @@ class CreatedFund extends Command
                         // 历史净值信息
                         if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                             foreach ($item['netWorthData'] as $info){
-                                echo $info[0];
                                 $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', [':code' => $item['code'],':date'=>$info[0]]);
                                 // 不存在则写入,存在则更新
                                 if (!$get_info){
