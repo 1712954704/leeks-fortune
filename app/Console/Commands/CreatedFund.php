@@ -28,7 +28,7 @@ class CreatedFund extends Command
     protected $description = 'created leek_fund';
 
     protected $send_num;
-    protected $limit_num = 50;
+    protected $limit_num = 200;
     protected $url;
     protected $start_time;
     protected $end_time;
@@ -50,7 +50,8 @@ class CreatedFund extends Command
         $this->RequestLog = new RequestLog();
         $this->FundErrorLog = new FundErrorLog();
         $this->send_num = 0;
-        $this->start_time = '2021-01-01';
+//        $this->start_time = '2021-01-01';
+        $this->start_time = date('Y-m-d',strtotime('-1 month'));
         $this->end_time = date('Y-m-d',strtotime('-1 day'));
     }
 
