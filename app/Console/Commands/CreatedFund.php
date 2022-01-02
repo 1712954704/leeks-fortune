@@ -119,7 +119,13 @@ class CreatedFund extends Command
                         }
                     }
                     // 更新基金信息(经理,规模)
-                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$item['fundScale'],'code' => $item['code']]);
+                    $length = strpos($item['fundScale'],'亿') ?: false;
+                    if ($length){
+                        $fundScale = substr($item['fundScale'],0,$length);
+                    }else{
+                        $fundScale = $item['fundScale'];
+                    }
+                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$fundScale,'code' => $item['code']]);
                 }
             }
         }
