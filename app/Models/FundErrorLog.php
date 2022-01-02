@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Fund extends Model
+class FundErrorLog extends Model
 {
     //
-    protected $table = "leeks_fund";
+    protected $table = "leeks_fund_error_log";
 }
