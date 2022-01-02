@@ -108,7 +108,7 @@ class CreatedFund extends Command
                     }else{
                         $fundScale = $item['fundScale'];
                     }
-                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', [':manager'=>$item['manager'],';fundScale'=>$fundScale,':code' => $item['code']]);
+                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', [':manager'=>$item['manager'],':fundScale'=>$fundScale,':code' => $item['code']]);
                     // 历史净值信息
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
