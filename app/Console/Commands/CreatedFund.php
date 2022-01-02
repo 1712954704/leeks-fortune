@@ -128,9 +128,9 @@ class CreatedFund extends Command
                             }
                         }
                     }
-                    echo $limit.PHP_EOL;
                 }
             }
+            echo $limit.PHP_EOL;
         }
         echo 'done';
     }
