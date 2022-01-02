@@ -26,7 +26,7 @@ class CreatedFund extends Command
      */
     protected $description = 'created leek_fund';
 
-    protected $limit_num = 100;
+    protected $limit_num = 200;
 
     /**
      * Create a new command instance.
@@ -110,24 +110,24 @@ class CreatedFund extends Command
                     }
                     DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$fundScale,'code' => $item['code']]);
                     // 历史净值信息
-                    if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
-                        foreach ($item['netWorthData'] as $info){
-                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
-                            // 不存在则写入,存在则更新
-                            if (!$get_info){
-                                $date = $info[0].' 00:00:00';
-                                $data = [
-                                    'code' => $item['code'],
-                                    'date' => $date,    // 日期
-                                    'nav' => round($info[1],4),     // 单位净值
-                                    'worth' => round($info[2],4),   // 净值涨幅
-                                ];
-                                $FundWorthDetail->insert($data);
-                            }else{
-                                DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', ['nav'=>round($info[1],4),'worth'=>round($info[2],4),'code' => $item['code'],'date'=>$info[0]]);
-                            }
-                        }
-                    }
+//                    if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
+//                        foreach ($item['netWorthData'] as $info){
+//                            $get_info = DB::select('select id,code from leeks_fund_worth_detail where code = :code and date = :date', ['code' => $item['code'],'date'=>$info[0]]);
+//                            // 不存在则写入,存在则更新
+//                            if (!$get_info){
+//                                $date = $info[0].' 00:00:00';
+//                                $data = [
+//                                    'code' => $item['code'],
+//                                    'date' => $date,    // 日期
+//                                    'nav' => round($info[1],4),     // 单位净值
+//                                    'worth' => round($info[2],4),   // 净值涨幅
+//                                ];
+//                                $FundWorthDetail->insert($data);
+//                            }else{
+//                                DB::update('update leeks_fund_worth_detail set nav = :nav, worth = :worth where code = :code and date = :date', ['nav'=>round($info[1],4),'worth'=>round($info[2],4),'code' => $item['code'],'date'=>$info[0]]);
+//                            }
+//                        }
+//                    }
                 }
             }
             echo $limit.PHP_EOL;
