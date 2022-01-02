@@ -101,8 +101,8 @@ class CreatedFund extends Command
             if ($send_result['code'] == 200){
                 $send_num ++;
                 foreach ($send_result['data'] as $item){
-//                    var_dump($item['manager']).'==';
-//                    var_dump($item['fundScale']).PHP_EOL;continue;
+                    var_dump($item['manager']).'==';
+                    var_dump($item['fundScale']).PHP_EOL;continue;
                     // 更新基金信息(经理,规模)
                     $length = strpos($item['fundScale'],'亿') ?: false;
                     if ($length){
