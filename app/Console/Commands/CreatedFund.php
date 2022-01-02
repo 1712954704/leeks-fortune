@@ -83,6 +83,7 @@ class CreatedFund extends Command
             $result = DB::select('select id,code from leeks_fund order by id asc limit :limit,:offset', ['limit' => $limit,'offset'=>$this->limit_num]);
             $result = array_map('get_object_vars', $result);
             $string_code = implode(',',array_column($result,'code'));
+//            $string_code = '000069';
             $option = '?code='.$string_code.'&startDate='.$start_time.'&endDate='.$end_time;
             $url .= $option;
             if (!($send_num%100) && $send_num){
@@ -91,6 +92,7 @@ class CreatedFund extends Command
             }else{
                 $send_result = send($url,'get');
             }
+//            file_put_contents('result.txt',json_encode($send_result,256));die();
             // 写入日志
             $log_data = [
                 'result' => json_encode($send_result,JSON_UNESCAPED_UNICODE),
@@ -99,6 +101,14 @@ class CreatedFund extends Command
             if ($send_result['code'] == 200){
                 $send_num ++;
                 foreach ($send_result['data'] as $item){
+                    // 更新基金信息(经理,规模)
+                    $length = strpos($item['fundScale'],'亿') ?: false;
+                    if ($length){
+                        $fundScale = substr($item['fundScale'],0,$length);
+                    }else{
+                        $fundScale = $item['fundScale'];
+                    }
+                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$fundScale,'code' => $item['code']]);
                     // 历史净值信息
                     if (isset($item['netWorthData']) && is_array($item['netWorthData'])){
                         foreach ($item['netWorthData'] as $info){
@@ -118,14 +128,7 @@ class CreatedFund extends Command
                             }
                         }
                     }
-                    // 更新基金信息(经理,规模)
-                    $length = strpos($item['fundScale'],'亿') ?: false;
-                    if ($length){
-                        $fundScale = substr($item['fundScale'],0,$length);
-                    }else{
-                        $fundScale = $item['fundScale'];
-                    }
-                    DB::update('update leeks_fund set manager = :manager, fundScale = :fundScale where code = :code', ['manager'=>$item['manager'],'fundScale'=>$fundScale,'code' => $item['code']]);
+                    echo $limit.PHP_EOL;
                 }
             }
         }
